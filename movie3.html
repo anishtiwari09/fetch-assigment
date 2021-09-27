@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        #main{
+            display:flex;
+            gap:10px;
+        }
+        #searching{
+            display: block;
+            margin-left:10px;
+            margin-top: 10vh;
+           
+
+        }
+
+        #movie-box{
+           display:none;
+            margin: auto;
+            width:45%;
+            text-align: center;
+            border: 2px solid black;
+        }
+       #movie-display {
+        display: flex;
+        margin: auto;
+        width:100%;
+        text-align: center;
+        }
+
+        #movie-display>div:nth-of-type(2) {
+            margin-left: 2rem;
+        }
+
+        #about{
+
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+        }
+
+        p{
+            font-size: 20px;
+        }
+
+        #loading {
+            display: none;
+
+        }
+
+        label {
+            font-size: 30px;
+        }
+
+        
+
+        input {
+            height: 30px;
+            width: 100px;
+            font-size: 20px;
+        }
+        h2{
+            text-align: center;
+            display: none;;
+        }
+        span{
+            
+            text-align: left;
+            font-weight:bold
+        }
+        h3{
+            font-size:35px;
+            
+        }
+    h1{
+        font-size: 25px;
+        margin:0px;
+        margin-bottom:10px;
+        font-weight: normal;
+    }
+    </style>
+</head>
+
+<body>
+   <div id="main">
+    <div id="searching">
+        <form>
+            <label>Movie Name: </label>
+            <input type="text" id="movie">
+            <input type="submit" value="Search" id="search">
+        </form>
+       
+    </div>
+    <div id="movie-box">
+        <h1 id="recc">Reccomended</h1>
+        <div id="movie-display">
+        </div> 
+    </div>
+   </div>
+
+        <h4 id="loading">Loding....</h4>
+        <h2 id="not-found">Movies Not Found</h2>
+      
+   
+    
+    
+    <script>
+        function hiddenMovieDetails()
+        {
+            let mainBox=document.getElementById('movie-box')
+            mainBox.style.display="none"
+        }
+        function loadMovie(name) {
+            hiddenMovieDetails()
+
+           
+            return fetch(`http://www.omdbapi.com/?t=${name}&apikey=30fb2d5c&`).then(
+                function (response) {
+                    
+                        return response.json()
+                }
+            ).catch(function (err) {
+                //console.log('error')
+            })
+        }
+
+        function searchMovies(e) {
+            e.preventDefault()
+            let name = document.getElementById('movie').value
+            document.getElementById('loading').style.display = "block"
+            loadMovie(name).then(function(res) {
+                document.getElementById('loading').style.display = "none"
+               // console.log(res)
+              
+                    displayMovieDetails(res)
+                
+
+            })
+
+        }
+
+        function reccomended(res)
+        {
+            
+            let recc=document.getElementById('recc')
+            console.log('reccomended')
+            console.log(res.imdbRating)
+            if(Number(res.imdbRating)>8.5)
+            recc.style.display="block"
+            else
+            recc.style.display="none"
+  
+        }  
+  
+
+
+
+        function displayMovieDetails(res) {
+            //console.log(res.Poster)
+            let container=document.getElementById('movie-display')
+            let mainBox=document.getElementById('movie-box')
+            
+            container.innerHTML=""
+           
+            if(res.Response=='False')
+            {
+                document.getElementById('not-found').style.display="block"
+                
+            }
+            else{
+                document.getElementById('not-found').style.display="none"
+                createBox(res,container)
+                mainBox.style.display="block"
+                reccomended(res)
+                //container.append(div)
+            }
+
+            
+        }
+     
+      function createBox(res,container)
+      {
+       // console.log(res.Pos)
+        let box=document.createElement('div')
+    
+        box.setAttribute('id','about')
+        let img = document.createElement('img')
+        let imgBox=document.createElement('div')
+        img.src = res.Poster
+        imgBox.append(img)
+        let title = document.createElement('h3')
+         title.innerHTML =res.Title
+        let desc = document.createElement('p')
+        desc.innerHTML = res.Plot
+        let Actores = document.createElement('p')
+        Actores.innerHTML = `<span>Actores: </span> ${res.Actors}`
+        let direct = document.createElement('p')
+        direct.innerHTML = `<span>Director: </span>${res.Director}`
+        let produce = document.createElement('p')
+        produce.innerHTML = `<span>Production: </span>${res.Production}`
+        let date = document.createElement('p')
+        date.innerHTML = `<span>Release Date: </span>${res.Released}`
+        let rating = document.createElement('p')
+        rating.innerHTML = `<span>IMDB Rating: </span>${res.imdbRating}`
+        box.append(title, desc, Actores, direct, produce, date, rating)
+    container.append(imgBox,box)
+      }
+
+
+        window.addEventListener('load',function(){
+            let btn=document.querySelector('form')
+            {
+                btn.addEventListener('submit',searchMovies)
+                
+            }
+        })
+        
+    </script>
+</body>
+
+</html>
